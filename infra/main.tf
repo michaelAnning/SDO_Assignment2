@@ -4,144 +4,9 @@ provider "aws" {
   region  = "us-east-1"
 }
 
-# Create a VPC
-resource "aws_vpc" "main" {
-  cidr_block = "10.0.0.0/16"
-
-  tags = {
-    Name = "Assignment2 VPC"
-  }
-}
-
-# Create a VPC Internet Gateway
-resource "aws_internet_gateway" "igw" {
-  vpc_id = "${aws_vpc.main.id}"
-
-  tags = {
-    Name = "Assignment2 Internet Gateway"
-  }
-}
-
-# Create Default Routing Table
-resource "aws_default_route_table" "default_table" {
-  default_route_table_id = "${aws_vpc.main.default_route_table_id}"
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = "${aws_internet_gateway.igw.id}"
-  }
-
-  tags = {
-    Name = "Default Table"
-  }
-}
-
-# Establish Subnets For VPC
-
-## Public Availability Zones
-resource "aws_subnet" "public_az1" {
-  vpc_id                  = "${aws_vpc.main.id}"
-  cidr_block              = "10.0.0.0/22"
-  availability_zone       = "us-east-1a"
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "Public AZ1"
-  }
-}
-
-resource "aws_subnet" "public_az2" {
-  vpc_id                  = "${aws_vpc.main.id}"
-  cidr_block              = "10.0.4.0/22"
-  availability_zone       = "us-east-1b"
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "Public AZ2"
-  }
-}
-
-resource "aws_subnet" "public_az3" {
-  vpc_id                  = "${aws_vpc.main.id}"
-  cidr_block              = "10.0.8.0/22"
-  availability_zone       = "us-east-1c"
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "Public AZ3"
-  }
-}
-
-## Private Availability Zones
-resource "aws_subnet" "private_az1" {
-  vpc_id                  = "${aws_vpc.main.id}"
-  cidr_block              = "10.0.16.0/22"
-  availability_zone       = "us-east-1a"
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "Private AZ1"
-  }
-}
-
-resource "aws_subnet" "private_az2" {
-  vpc_id                  = "${aws_vpc.main.id}"
-  cidr_block              = "10.0.20.0/22"
-  availability_zone       = "us-east-1b"
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "Private AZ2"
-  }
-}
-
-resource "aws_subnet" "private_az3" {
-  vpc_id                  = "${aws_vpc.main.id}"
-  cidr_block              = "10.0.24.0/22"
-  availability_zone       = "us-east-1c"
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "Private AZ3"
-  }
-}
-
-## Data Availability Zones
-resource "aws_subnet" "data_az1" {
-  vpc_id                  = "${aws_vpc.main.id}"
-  cidr_block              = "10.0.32.0/22"
-  availability_zone       = "us-east-1a"
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "Data AZ1"
-  }
-}
-
-resource "aws_subnet" "data_az2" {
-  vpc_id                  = "${aws_vpc.main.id}"
-  cidr_block              = "10.0.36.0/22"
-  availability_zone       = "us-east-1b"
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "Data AZ2"
-  }
-}
-
-resource "aws_subnet" "data_az3" {
-  vpc_id                  = "${aws_vpc.main.id}"
-  cidr_block              = "10.0.40.0/22"
-  availability_zone       = "us-east-1c"
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "Data AZ3"
-  }
-}
-
 # Setup Security Groups
 resource "aws_security_group" "allow_https_ssh" {
+  name        = "allow_https_and_ssh"
   description = "Allow inbound SSH & HTTPs traffic."
   vpc_id      = "${aws_vpc.main.id}"
 
@@ -173,11 +38,64 @@ resource "aws_security_group" "allow_https_ssh" {
   }
 }
 
+# Define Subnet Groups
+resource "aws_db_subnet_group" "public" {
+  name       = "pubsubs"
+  subnet_ids = ["${aws_subnet.public_az1.id}", "${aws_subnet.public_az2.id}", "${aws_subnet.public_az3.id}"]
+
+  tags = {
+    Name = "Public Subnets Group"
+  }
+}
+
+resource "aws_db_subnet_group" "private" {
+  name       = "privsubs"
+  subnet_ids = ["${aws_subnet.private_az1.id}", "${aws_subnet.private_az2.id}", "${aws_subnet.private_az3.id}"]
+
+  tags = {
+    Name = "Private Subnets Group"
+  }
+}
+
+resource "aws_db_subnet_group" "data" {
+  name       = "datsubs"
+  subnet_ids = ["${aws_subnet.data_az1.id}", "${aws_subnet.data_az2.id}", "${aws_subnet.data_az3.id}"]
+
+  tags = {
+    Name = "Data Subnets Group"
+  }
+}
+
 # Setup Public AZ Load Balancer
 resource "aws_lb" "assignment2" {
   name               = "assignment2-lb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = ["${aws_security_group.allow_https_ssh.id}"]
-  subnets            = ["${aws_subnet.public_az1.id}", "${aws_subnet.public_az2.id}", "${aws_subnet.public_az3.id}"]
+  subnets            = "${aws_db_subnet_group.public.subnet_ids}"
+}
+
+# Setup Kubernetes
+resource "random_string" "tfstatename" {
+  length  = 6
+  special = false
+  upper   = false
+}
+
+resource "aws_s3_bucket" "kops_state" {
+  bucket        = "rmit-kops-state-${random_string.tfstatename.result}"
+  acl           = "private"
+  force_destroy = true
+
+  versioning {
+    enabled = true
+  }
+
+  tags = {
+    Name = "kops remote state"
+  }
+}
+
+output "kops_state_bucket_name" {
+  value = "${aws_s3_bucket.kops_state.bucket}"
 }
