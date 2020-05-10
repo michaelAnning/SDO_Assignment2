@@ -10,6 +10,10 @@ resource "aws_instance" "private_instance" {
   # Only one Subnet is Needed/Allowed
   subnet_id = "${aws_subnet.private_az1.id}"
 
+  # Provide a Public IP to Access this Server from the Internet
+  # Allows us to access it remotely.
+  associate_public_ip_address = "true" # Reference: https://blog.albertoacuna.com/using-terraform-to-create-an-ec2-instance-within-a-public-subnet-in-aws/
+
   vpc_security_group_ids = [
   "${aws_security_group.allow_https_ssh.id}"]
 
