@@ -15,12 +15,13 @@ resource "aws_db_instance" "default" {
 
   # Security Group
   vpc_security_group_ids = [
-  "${aws_security_group.allow_https_ssh.id}"]
+  "${aws_security_group.allow_http_ssh.id}"]
+
+  # Snapshots won't be made in the database, eating up resource time.
+  ## (If on the off-chance it is, removed the ability to do so and apply the changes.)
+  skip_final_snapshot = true 
 
   tags = {
     Name = "Data Layer Database"
   }
-
-  # Added to allow myself to delete DBs before applying them. Reference: https://ndench.github.io/terraform/terraform-destroy-rds
-  final_snapshot_identifier = "death"
 }

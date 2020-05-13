@@ -15,9 +15,12 @@ resource "aws_instance" "private_instance" {
   associate_public_ip_address = "true" # Reference: https://blog.albertoacuna.com/using-terraform-to-create-an-ec2-instance-within-a-public-subnet-in-aws/
 
   vpc_security_group_ids = [
-  "${aws_security_group.allow_https_ssh.id}"]
+  "${aws_security_group.allow_http_ssh.id}"]
 
   tags = {
     Name = "Private Layer Ec2"
   }
+
+  # Connect to ec2 via SSH command
+  # ssh -i ~/.ssh ec2-user@"${aws_instance.private_instance.instance_public_ip}"
 }
