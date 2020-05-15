@@ -5,9 +5,13 @@ cat > dist/conf.toml << EOL
 "DbPassword" = "${database_password}"
 "DbName" = "${database_name}"
 "DbPort" = "5432"
-"DbHost" = "${database_endpoint}"
+"DbHost" = "${database_address}"
 "ListenHost" = "0.0.0.0"
 "ListenPort" = "80"
 EOL
 
-# sudo systemctl restart todo # Currently doesn't work because: 'Failed to restart todo.service: Unit not found.'
+# Populate the Database With Tables (To Store Records On)
+dist/TechTestApp updatedb -s
+
+# Restart to Register Changes to Service/DB
+sudo systemctl restart servian # 'servian' is the name of the service (ie. servian.service)

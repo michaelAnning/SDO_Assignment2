@@ -19,7 +19,7 @@ resource "aws_security_group" "allow_http_ssh" {
   }
 
   ingress {
-    description = "HTTPS from the internet."
+    description = "HTTP from the internet."
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
@@ -35,6 +35,31 @@ resource "aws_security_group" "allow_http_ssh" {
 
   tags = {
     Name = "Allow HTTP & SSH"
+  }
+}
+
+resource "aws_security_group" "db_security_group" {
+  name        = "allow_postgres_communication"
+  description = "Allow inbound Postgres traffic."
+  vpc_id      = "${aws_vpc.main.id}"
+
+  ingress {
+    description = "Allow VPC to Communicate with Postgres Port."
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "Allow Postgres Communication"
   }
 }
 
@@ -121,7 +146,7 @@ data "template_file" "update_db" {
 
   vars = {
     public_ip_of_private_server = "${aws_instance.private_instance.public_ip}" # Public Server
-    database_endpoint = "${aws_db_instance.default.endpoint}"
+    database_address = "${aws_db_instance.default.address}"
     database_name = "${aws_db_instance.default.name}"
     database_username = "${aws_db_instance.default.username}"
     database_password = "${aws_db_instance.default.password}"

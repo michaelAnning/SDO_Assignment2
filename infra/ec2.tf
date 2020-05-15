@@ -2,7 +2,8 @@
 resource "aws_instance" "private_instance" {
 
   # Reference Amazon Linux 2 Image
-  ami = "ami-0323c3dd2da7fb37d"
+  ami = "ami-0323c3dd2da7fb37d" # Latest Linux Image
+  # ami = "ami-055d18a0205f9ddb1" # Tutorial Week
 
   key_name      = "${aws_key_pair.deployer.key_name}"
   instance_type = "t2.micro"

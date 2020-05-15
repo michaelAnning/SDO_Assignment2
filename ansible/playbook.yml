@@ -11,14 +11,14 @@
       become: yes
       get_url:
         url: https://github.com/servian/TechTestApp/releases/download/v.0.6.0/TechTestApp_v.0.6.0_linux64.zip
-        dest: /home/ec2-user
+        dest: /etc
         mode: 0755 # Set permission of file
         
     - name: Extract the App to the ec2
       become: yes
       unarchive:
-        src: /home/ec2-user/TechTestApp_v.0.6.0_linux64.zip
-        dest: /home/ec2-user
+        src: /etc/TechTestApp_v.0.6.0_linux64.zip
+        dest: /etc
         remote_src: yes # Tells cmd that the zip is already on the remote ec2: https://docs.ansible.com/ansible/latest/modules/unarchive_module.html
 
 # Play 2
@@ -26,9 +26,25 @@
   hosts: dbservers
   tasks:
 
-    - name: Connect to Database
+    # Install Local Service on Remote Host: https://stackoverflow.com/questions/40113964/how-can-i-install-a-systemd-service-using-ansible
+    - name: Install Deployment Service on Remote Host
+      become: yes
+      template:
+        src: create_service.tpl
+        dest: /etc/systemd/system/servian.service
+
+    # Execute Shell Script on Remote Hosts: https://stackoverflow.com/questions/21160776/how-to-execute-a-shell-script-on-a-remote-server-using-ansible
+    - name: Connect to & Reload the Database
       become: yes
       become_method: sudo
       script:
-        # chdir: ~/ # Setup our placement in the remote directory before running the script
-        cmd: ../ansible/update_db.sh # Copy a local script to the remote directory, & run it.
+        chdir: /etc # Setup our placement in the remote directory before running the script
+        cmd: update_db.sh # Copy a local script to the remote directory, & run it.
+
+    - name: Deploy App Using Service
+      become: yes
+      systemd:
+        name: servian # Name of the serivce added, without the '.service' part.
+        state: started
+        daemon_reload: yes # If the servian.service file is changed, this reloads the system to accomodate for changes.
+        enabled: yes # Start service on booting the ec2
