@@ -133,3 +133,4 @@ resource "aws_subnet" "data_az3" {
     Name = "Data AZ3"
   }
 }
+

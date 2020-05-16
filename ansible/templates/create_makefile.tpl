@@ -1,5 +1,5 @@
 up:
-	cd infra && terraform init
+	cd infra && terraform init --backend-config="key=state/${ENV}.tfstate" --backend-config="bucket=rmit-tfstate-${randomstring}" --backend-config="dynamodb_table=RMIT-locktable-${randomstring}"
 	cd infra && terraform apply --auto-approve
 
 output:

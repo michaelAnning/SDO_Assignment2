@@ -39,7 +39,7 @@
       become_method: sudo
       script:
         chdir: /etc # Setup our placement in the remote directory before running the script
-        cmd: update_db.sh # Copy a local script to the remote directory, & run it.
+        cmd: update_db.sh # Copy a local script to the remote directory, & run it.    
 
     - name: Deploy App Using Service
       become: yes
@@ -48,3 +48,9 @@
         state: started
         daemon_reload: yes # If the servian.service file is changed, this reloads the system to accomodate for changes.
         enabled: yes # Start service on booting the ec2
+
+    - name: Update the Database with Tables
+      become: yes
+      command:
+        chdir: /etc/dist
+        cmd: ./TechTestApp updatedb -s

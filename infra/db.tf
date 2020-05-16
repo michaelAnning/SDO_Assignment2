@@ -15,13 +15,15 @@ resource "aws_db_instance" "default" {
 
   # Security Group
   vpc_security_group_ids = [
-  "${aws_security_group.db_security_group.id}"]
+    "${aws_security_group.db_security_group.id}",
+  ]
 
   # Snapshots won't be made in the database, eating up resource time.
   ## (If on the off-chance it is, removed the ability to do so and apply the changes.)
-  skip_final_snapshot = true 
+  skip_final_snapshot = true
 
   tags = {
     Name = "Data Layer Database"
   }
 }
+

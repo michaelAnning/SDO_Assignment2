@@ -159,25 +159,20 @@ resource "local_file" "save_db_script_to_directory" {
   filename = "../ansible/update_db.sh"
 }
 
-# Create Makefile (Provide it Correct VPC Details)
-data "template_file" "create_makefile" {
-  template = "${file("../ansible/templates/create_makefile.tpl")}"
 
-  vars = {
-    public_ip_of_private_server = "${aws_instance.private_instance.public_ip}" # Public Server
-  }
-}
-
-# Save Makefile
-resource "local_file" "save_makefile_to_directory" {
-  content = "${data.template_file.create_makefile.rendered}"
-  filename = "../Makefile"
-}
 
 # # Auto Run Ansible Playbook
 # resource "template_file" "playbook" {
 #   template = "${file("../ansible/templates/run_ansible.tpl")}"
 # }
+
+#Create the Backend (Apparently Done After the First Two)
+terraform {
+  backend "s3" {
+    key = ".terraform/terraform.tfstate"
+    region = "us-east-1"
+  }
+}
 
 # # Setup Kubernetes
 # resource "random_string" "tfstatename" {

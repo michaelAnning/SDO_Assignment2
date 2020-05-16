@@ -17,3 +17,4 @@ output "db_user" {
 output "db_pass" {
   value = "${aws_db_instance.default.password}"
 }
+
