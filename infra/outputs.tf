@@ -1,19 +1,20 @@
 output "instance_public_ip" {
-  value = 
+  value = "${aws_instance.private_instance.public_ip}"
 }
 
 output "lb_endpoint" {
-  value = 
+  value = "${aws_lb.assignment2.dns_name}"
 }
 
 output "db_endpoint" {
-  value = 
+  value = "${aws_db_instance.default.address}"
 }
 
 output "db_user" {
-  value = 
+  value = "${aws_db_instance.default.username}"
 }
 
 output "db_pass" {
-  value = 
+  value = "${aws_db_instance.default.password}"
 }
+
