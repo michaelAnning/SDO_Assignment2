@@ -123,9 +123,13 @@ Once restarted, Ansible's now prepared to startup our app. It will ensure the .s
 
 While accessible, we still have a major issue with the app. The app itself is a todo-list software, and it relies on a database to store tasks & list them on the website. However, if you only do the above, all that'll be visible is the servian webpage with a list of tasks all reading 'Now Loading'. That means the database isn't operation.
 
+![alt text](http://url/to/servian_nodb.png)
+
 The reason for this is because the app's database isn't currently able to hold data. While we have config it so it connects to our database, we still haven't activated our database. To fix this, Ansible runs the command './TechTestApp updatedb -s', which fully links the AWS db with the remote app's. As a result, it creates tables based on the setup of the AWS db, and can now send queries towards it. With that done, our application is fully deployed.
 
 ![alt text](http://url/to/ansible_updatedb.png)
+
+![alt text](http://url/to/servian_db.png)
 
 ## cleanup instructions
 
