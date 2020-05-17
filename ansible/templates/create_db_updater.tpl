@@ -10,8 +10,5 @@ cat > dist/conf.toml << EOL
 "ListenPort" = "80"
 EOL
 
-# Populate the Database With Tables (To Store Records On)
-dist/TechTestApp updatedb -s
-
 # Restart to Register Changes to Service/DB
 sudo systemctl restart servian # 'servian' is the name of the service (ie. servian.service)

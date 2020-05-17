@@ -1,3 +1,6 @@
+printCreds:
+	cd ~/.aws && sed -n 2,4p credentials
+
 start:
 	make start1
 	make start2
