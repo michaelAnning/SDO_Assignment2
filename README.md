@@ -51,7 +51,7 @@ Makefiles are manipulated via a make command. They follow this format: 'make [id
 
 For example, as illustrated in this image:
 
-![alt text](https://github.com/michaelAnning/SDO_Assignment2/tree/master/images/makefile_start.png)
+![alt text](https://github.com/michaelAnning/SDO_Assignment2/tree/master/images/makefile_start.png?raw=true)
 
 We have an identifier called 'start'. Referring to our format, we would replace '[identifier]' with 'start' to have the makefile call the commands pre-defined within it.
 
@@ -67,7 +67,7 @@ If you'd like to ssh into your EC2 after 'make start' finishes running, enter 'm
 
 'make start' will utilise the services of both Terraform & Ansible, using terraform to develop our app's infrastructure, and then Ansible to update our EC2 instance containing our application. Think of Terraform as the automated equivalent of setting up both our application and an environment it can run on (the Amazon EC2). Then, Ansible automates turning on all components in our environment, so the app can be accessed via the internet.
 
-![alt text](https://github.com/michaelAnning/SDO_Assignment2/tree/master/images/make_start.png)
+![alt text](https://github.com/michaelAnning/SDO_Assignment2/tree/master/images/make_start.png?raw=true)
 
 - Setting Up Components for the Remote Backend
 
@@ -79,15 +79,15 @@ DynamoDB is an NoSQL database, which our application can connect to to store dat
 
 After 'cd infra/backend && terraform apply', the resources will be created, and our required 'randomstring.txt' will be produced. The 6-lettered string found within will represent the id of both the S3 Bucket & DynamoDB_Table. 
 
-![alt text](https://github.com/michaelAnning/SDO_Assignment2/tree/master/images/backend_random.png)
+![alt text](https://github.com/michaelAnning/SDO_Assignment2/tree/master/images/backend_random.png?raw=true)
 
-![alt text](https://github.com/michaelAnning/SDO_Assignment2/tree/master/images/backend_setup.png)
+![alt text](https://github.com/michaelAnning/SDO_Assignment2/tree/master/images/backend_setup.png?raw=true)
 
 - Linking our Terraform Setup with the Remote Backend
 
 Now with that created, 'make start' initializes the main terraform.tfstate file used for the rest of the project. The remote backend defined in the 'main.tf' folder will be fed the ids of both the S3 Bucket & DynamoDB_Table, instructing where the application's main '.tfstate' file will be located: Remotely on your Amazon S3 bucket in the AWS Console.
 
-![alt text](https://github.com/michaelAnning/SDO_Assignment2/tree/master/images/makefile_start2.png)
+![alt text](https://github.com/michaelAnning/SDO_Assignment2/tree/master/images/makefile_start2.png?raw=true)
 
 - Automating our Application Infrastructure's Creation
 
@@ -105,7 +105,7 @@ Terraform has produced an inventory.yml file in our Ansible file, containing the
 
 First thing Ansible does is download the application we need from GitHub, in this case being a linux release of Servian Test App ( https://github.com/servian/TechTestApp/releases ) onto the remote host. As it's a zip file downloaded, Ansible then extracts the contents of the zip file.
 
-![alt text](https://github.com/michaelAnning/SDO_Assignment2/tree/master/images/ansible_play1.png)
+![alt text](https://github.com/michaelAnning/SDO_Assignment2/tree/master/images/ansible_play1.png?raw=true)
 
 - Turning on the Environment & App
 
@@ -117,19 +117,19 @@ Before the service is activated, Ansible first updates the remote app's database
 
 Once restarted, Ansible's now prepared to startup our app. It will ensure the .service file has already started, and if not, turn it on. Then it will reload the daemon_connection, essentially allowing the changes made to be visible when we use a browser to connect to the EC2's ip. With that, our application is now internet accessible.
 
-![alt text](https://github.com/michaelAnning/SDO_Assignment2/tree/master/images/ansible_play2.png)
+![alt text](https://github.com/michaelAnning/SDO_Assignment2/tree/master/images/ansible_play2.png?raw=true)
 
 - Updating the Database
 
 While accessible, we still have a major issue with the app. The app itself is a todo-list software, and it relies on a database to store tasks & list them on the website. However, if you only do the above, all that'll be visible is the servian webpage with a list of tasks all reading 'Now Loading'. That means the database isn't operation.
 
-![alt text](https://github.com/michaelAnning/SDO_Assignment2/tree/master/images/servian_nodb.png)
+![alt text](https://github.com/michaelAnning/SDO_Assignment2/tree/master/images/servian_nodb.png?raw=true)
 
 The reason for this is because the app's database isn't currently able to hold data. While we have config it so it connects to our database, we still haven't activated our database. To fix this, Ansible runs the command './TechTestApp updatedb -s', which fully links the AWS db with the remote app's. As a result, it creates tables based on the setup of the AWS db, and can now send queries towards it. With that done, our application is fully deployed.
 
-![alt text](https://github.com/michaelAnning/SDO_Assignment2/tree/master/images/ansible_updatedb.png)
+![alt text](https://github.com/michaelAnning/SDO_Assignment2/tree/master/images/ansible_updatedb.png?raw=true)
 
-![alt text](https://github.com/michaelAnning/SDO_Assignment2/tree/master/images/servian_db.png)
+![alt text](https://github.com/michaelAnning/SDO_Assignment2/tree/master/images/servian_db.png?raw=true)
 
 ## cleanup instructions
 
@@ -137,7 +137,7 @@ Cleanup's as easy as deploying the app. Another makefile identifer called 'stop'
 
 In short, call 'make stop' on the project's root directory.
 
-![alt text](https://github.com/michaelAnning/SDO_Assignment2/tree/master/images/makefile_stop.png)
+![alt text](https://github.com/michaelAnning/SDO_Assignment2/tree/master/images/makefile_stop.png?raw=true)
 
 - The Process'
 
@@ -145,4 +145,4 @@ Put simply, 'make stop' will tell Terraform to delete all our resources in the o
 
 An extra thing done here not handled by 'terraform destroy' is the destruction of the 'project/infra/.terraform.tfstate' file. It not destroyed, this would create issues in defining a new statefile to be stored on the S3 bucket. It's recommended to be done this way, as there's no real way to get around this issue other than deleting the file entirely.
 
-![alt text](https://github.com/michaelAnning/SDO_Assignment2/tree/master/images/makefile_stop3.png)
+![alt text](https://github.com/michaelAnning/SDO_Assignment2/tree/master/images/makefile_stop3.png?raw=true)
